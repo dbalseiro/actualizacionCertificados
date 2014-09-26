@@ -1,0 +1,43 @@
+#!/bin/bash
+set -e
+
+FILE_CERTIFICADOS=adecco.cert
+
+source config.sh
+
+function logAdecco() {
+	echo '[INFO]' $1
+}
+
+function main() {
+	logAdecco "Eliminando archivos de certificados anteriores locales"
+	rm -f *.crt
+
+	logAdecco "Leyendo certificados de $FILE_CERTIFICADOS"
+	awk -f actualizarAFIP.awk $FILE_CERTIFICADOS
+
+	logAdecco "Haciendo backups de certificados"
+	backupCertificados
+
+	logAdecco "Enviando nuevos certificados al servidor"
+	enviarCertificados
+}
+
+function backupCertificados() {
+	FECHA=`date +%Y%m%d`
+	for i in $CUITSADECCO; do
+		CERT=$CERTPATH/$i.crt 
+		mv $CERT $CERT.$FECHA
+	done
+}
+
+function enviarCertificados() {
+	for i in $CUITSADECCO; do
+		CERT=$CERTPATH/$i.crt 
+		mv $i.crt $CERT
+	done
+}
+
+######
+main #
+######
