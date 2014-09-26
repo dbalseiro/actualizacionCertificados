@@ -1,0 +1,54 @@
+#!/bin/bash
+
+source config.sh
+source functions.sh
+
+function isExpired() {
+	expiry_date=$1
+	seconds_until_expiry=$(echo $(date --date="$expiry_date" +%s) - $(date +%s) | bc)
+	days_until_expiry=$(echo "$seconds_until_expiry/(60*60*24)" |bc)
+
+	echo -ne "\tEXPIRY DATE --->" $(date --date="$expiry_date")
+	if [ $days_until_expiry -lt 0 ]
+	then
+		echo -e "\t*** EXPIRED *** ($days_until_expiry days)"
+	else
+		echo -e "\tVALID ($days_until_expiry days)"
+	fi
+}
+
+function printDate() {
+	echo "--- $1 (local) ---"
+	checkTrustDate $1
+	echo
+	echo "--- $1 (remote) ---"
+	checkCertDate $1
+	echo
+}
+
+function checkCertDate() {
+	date=$(getCertificate $1 443 | openssl x509 -noout -enddate)
+	isExpired "$(echo $date | cut -f2 -d=)"
+}
+
+function checkTrustDate() {
+	date=$(keytool -list -keystore $TS -v -alias $1 -storepass syntagma | grep ^Valid)
+	isExpired "$(echo $date | sed s/Valid\ from:.*until:\ //g)"
+}
+
+function checkCertDateInDisk() {
+	date=$(cat $1 | openssl x509 -noout -enddate)
+	isExpired "$(echo $date | cut -f2 -d=)"
+}
+
+for i in $SERVERS
+do
+	printDate $i
+done
+
+for i in $CUITSADECCO
+do
+	echo --- $i ---
+	checkCertDateInDisk $CERTPATH/$i.crt
+	echo
+done
