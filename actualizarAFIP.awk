@@ -16,7 +16,7 @@ BEGIN {
 
 /-----BEGIN CERTIFICATE-----/ {
 	imprimir = 1;
-	lineas = 1;
+	lineas = 0;
 }
 
 /-----END CERTIFICATE-----/ {
