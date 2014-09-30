@@ -37,18 +37,19 @@ function checkTrustDate() {
 }
 
 function checkCertDateInDisk() {
-	date=$(cat $1 | openssl x509 -noout -enddate)
+	CERT=$CERTPATH/$1.crt
+	echo --- $1 ---
+	date=$(cat $CERT | openssl x509 -noout -enddate)
 	isExpired "$(echo $date | cut -f2 -d=)"
+	echo
 }
 
 for i in $SERVERS
 do
-	printDate $i
+	printDate $i 
 done
 
 for i in $CUITSADECCO
 do
-	echo --- $i ---
-	checkCertDateInDisk $CERTPATH/$i.crt
-	echo
+	checkCertDateInDisk $i
 done
