@@ -2,11 +2,20 @@
 set -e
 
 FILE_CERTIFICADOS=adecco.cert
+FECHA=`date +%Y%m%d`
 
 source config.sh
+source functions.sh
 
 function logAdecco() {
-	echo '[INFO]' $1
+	echo '[INFO]' $@
+}
+
+function logAdeccoInline() {
+	while read r
+	do
+		logAdecco "$r"
+	done
 }
 
 function main() {
@@ -21,10 +30,12 @@ function main() {
 
 	logAdecco "Enviando nuevos certificados al servidor"
 	enviarCertificados
+
+	logAdecco "Importando Certificados en el almacen"
+	importarCertificados
 }
 
 function backupCertificados() {
-	FECHA=`date +%Y%m%d`
 	for i in $CUITSADECCO; do
 		CERT=$CERTPATH/$i.crt 
 		mv $CERT $CERT.$FECHA
@@ -35,6 +46,13 @@ function enviarCertificados() {
 	for i in $CUITSADECCO; do
 		CERT=$CERTPATH/$i.crt 
 		mv $i.crt $CERT
+	done
+}
+
+function importarCertificados() {
+	cp $KS $KS.$FECHA
+	for i in $CUITSADECCO; do
+		saveCertificate $i $CERTPATH/$i.crt $KS 2>&1 | logAdeccoInline
 	done
 }
 

@@ -1,12 +1,12 @@
 #!/bin/bash
+set -e
 
 source config.sh
 source functions.sh
 
 function importCertificate() {
 	getCertificate $1 443 > $1.cert
-	keytool -delete -alias $1 -keystore $TS -storepass syntagma -noprompt
-	keytool -import -alias $1 -file $1.cert -keystore $TS -storepass syntagma -noprompt
+	saveCertificate $1 $1.cert $3
 }
 
 for i in $SERVERS

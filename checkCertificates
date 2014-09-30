@@ -19,7 +19,7 @@ function isExpired() {
 
 function printDate() {
 	echo "--- $1 (local) ---"
-	checkTrustDate $1
+	checkTrustDate $1 $TS
 	echo
 	echo "--- $1 (remote) ---"
 	checkCertDate $1
@@ -32,15 +32,18 @@ function checkCertDate() {
 }
 
 function checkTrustDate() {
-	date=$(keytool -list -keystore $TS -v -alias $1 -storepass syntagma | grep ^Valid)
+	date=$(keytool -list -keystore $2 -v -alias $1 -storepass syntagma | grep ^Valid)
 	isExpired "$(echo $date | sed s/Valid\ from:.*until:\ //g)"
 }
 
 function checkCertDateInDisk() {
 	CERT=$CERTPATH/$1.crt
-	echo --- $1 ---
+	echo "--- $1 (archivo) ---"
 	date=$(cat $CERT | openssl x509 -noout -enddate)
 	isExpired "$(echo $date | cut -f2 -d=)"
+	echo
+	echo "--- $1 (almacen) ---"
+	checkTrustDate $1 $KS
 	echo
 }
 
@@ -53,3 +56,4 @@ for i in $CUITSADECCO
 do
 	checkCertDateInDisk $i
 done
+
