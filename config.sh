@@ -1,8 +1,41 @@
-TS="/var/jboss-5.1.0.GA/server/esphoraSsl/conf/server.keystore"
-KS="/var/jboss-5.1.0.GA/server/esphoraSsl/conf/test/conector.keystore"
-CERTPATH="/var/jboss-5.1.0.GA/server/esphoraSsl/conf/test/certs"
-SERVERS="wsaahomo.afip.gov.ar wswhomo.afip.gov.ar"
-CUITSADECCO="
+#!/bin/bash
+
+function readProperty() {
+  cat $1 | 
+  grep "^$2[[:space:]]*\=" | 
+  head -1 | 
+  cut -f2 -d= | 
+  sed s/^[[:space:]]*//g | 
+  sed s/[[:space:]]$//g
+}
+
+JBOSS_HOME="/var/jboss-5.1.0.GA"
+SERVER="esphoraSsl"
+
+PROPERTYFILE="$JBOSS_HOME/server/$SERVER/conf/conector.properties"
+
+AMBIENTE=`readProperty $PROPERTYFILE ambiente`
+TSFILE=`readProperty $PROPERTYFILE servicio.jksfile`
+KSFILE=`readProperty $PROPERTYFILE jksfile`
+
+TS="$JBOSS_HOME/server/$SERVER/conf/$TSFILE"
+KS="$JBOSS_HOME/server/$SERVER/conf/$AMBIENTE/$KSFILE"
+CERTPATH="$JBOSS_HOME/server/$SERVER/conf/$AMBIENTE/certs"
+
+PATHPROPERTIES="$JBOSS_HOME/server/$SERVER/conf/$AMBIENTE"
+
+SERVERS=
+for i in $PATHPROPERTIES/*.properties; do
+  readProperty $i wsdl | cut -f3 -d/
+done |
+uniq |
+while read r; do
+  SERVERS="$SERVERS $r"
+done
+
+CUITSADECCO=$(cat $FILECUITS)
+
+
 33661814999
 33679836299
 30656760172
