@@ -1,42 +1,35 @@
 #!/bin/bash
 
 function readProperty() {
-  cat $1 | 
-  grep "^$2[[:space:]]*\=" | 
-  head -1 | 
-  cut -f2 -d= | 
-  sed s/^[[:space:]]*//g | 
-  sed s/[[:space:]]$//g
+    cat $1 | 
+    grep "^$2[[:space:]]*\=" | 
+    head -1 | 
+    cut -f2 -d= | 
+    sed s/^[[:space:]]*//g | 
+    sed s/[[:space:]]*$//g
 }
 
 JBOSS_HOME="/var/jboss-5.1.0.GA"
-SERVER="esphoraSsl"
+JBOSS_SERVER="esphoraSsl"
 
-PROPERTYFILE="$JBOSS_HOME/server/$SERVER/conf/conector.properties"
+PROPERTYFILE="$JBOSS_HOME/server/$JBOSS_SERVER/conf/conector.properties"
 
 AMBIENTE=`readProperty $PROPERTYFILE ambiente`
 TSFILE=`readProperty $PROPERTYFILE servicio.jksfile`
 KSFILE=`readProperty $PROPERTYFILE jksfile`
 
-TS="$JBOSS_HOME/server/$SERVER/conf/$TSFILE"
-KS="$JBOSS_HOME/server/$SERVER/conf/$AMBIENTE/$KSFILE"
-CERTPATH="$JBOSS_HOME/server/$SERVER/conf/$AMBIENTE/certs"
+STOREPASS=`readProperty $PROPERTYFILE jkspwd`
 
-PATHPROPERTIES="$JBOSS_HOME/server/$SERVER/conf/$AMBIENTE"
+TS="$JBOSS_HOME/server/$JBOSS_SERVER/conf/$TSFILE"
+KS="$JBOSS_HOME/server/$JBOSS_SERVER/conf/$AMBIENTE/adecco.keystore"
+CERTPATH="$JBOSS_HOME/server/$JBOSS_SERVER/conf/$AMBIENTE/certs"
 
-SERVERS=
-for i in $PATHPROPERTIES/*.properties; do
-  readProperty $i wsdl | cut -f3 -d/
-done |
-uniq |
-while read r; do
-  SERVERS="$SERVERS $r"
-done
+PATHPROPERTIES="$JBOSS_HOME/server/$JBOSS_SERVER/conf/$AMBIENTE"
 
-CUITSADECCO=$(cat $FILECUITS)
+SERVERS=`for i in $PATHPROPERTIES/*.properties
+do
+    readProperty $i wsdl | 
+    cut -f3 -d/
+done | uniq`
 
-
-33661814999
-33679836299
-30656760172
-"
+CUITSADECCO=`cat $CERTPATH/cuitsadecco`

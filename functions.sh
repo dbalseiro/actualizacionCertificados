@@ -1,8 +1,8 @@
 #!/bin/bash
 
 function saveCertificate() {
-	keytool -delete -alias $1 -keystore $3 -storepass syntagma -noprompt
-        keytool -import -alias $1 -file $2 -keystore $3 -storepass syntagma -noprompt
+	keytool -delete -alias $1 -keystore $3 -storepass $STOREPASS -noprompt
+        keytool -import -alias $1 -file $2 -keystore $3 -storepass $STOREPASS -noprompt
 }
 
 function getCertificate() {
